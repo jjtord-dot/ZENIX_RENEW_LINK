@@ -1,0 +1,14 @@
+name: Zenix 24/7 Renewal
+on:
+  schedule:
+    - cron: '0 4 * * *' # Runs daily
+  workflow_dispatch:     # Allows manual testing
+
+jobs:
+  renew:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Renewal Link
+        run: |
+          curl -L "${{ secrets.ZENIX_RENEW_LINK }}"
+          
