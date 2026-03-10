@@ -2,8 +2,8 @@ name: Zenix Auto Renew OCR
 
 on:
   schedule:
-    - cron: '0 16 * * *' # 12:00 AM PH Time
-  workflow_dispatch:
+    - cron: '0 16 * * *' # Ito ay 12:00 AM sa Pilipinas (PH Time)
+  workflow_dispatch:      # Para ma-test mo nang manual sa Actions tab
 
 jobs:
   build:
