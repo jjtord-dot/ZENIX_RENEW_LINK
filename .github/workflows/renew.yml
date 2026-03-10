@@ -20,11 +20,11 @@ jobs:
       - name: Install System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y tesseract-ocr chromium-browser
+          sudo apt-get install -y tesseract-ocr
 
       - name: Install Python Packages
         run: |
-          pip install undetected-chromedriver pytesseract Pillow selenium
+          pip install selenium pytesseract Pillow webdriver-manager
 
       - name: Run Script
         env:
