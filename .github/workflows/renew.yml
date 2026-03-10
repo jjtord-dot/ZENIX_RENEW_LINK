@@ -2,8 +2,8 @@ name: Zenix Auto Renew OCR
 
 on:
   schedule:
-    - cron: '0 16 * * *' # Tatakbo mamayang 12:00 AM PH Time
-  workflow_dispatch:      # Para ma-test mo ngayon din
+    - cron: '0 16 * * *' # 12:00 AM PH Time
+  workflow_dispatch:
 
 jobs:
   build:
@@ -20,11 +20,11 @@ jobs:
       - name: Install System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y tesseract-ocr libtesseract-dev
+          sudo apt-get install -y tesseract-ocr chromium-browser
 
       - name: Install Python Packages
         run: |
-          pip install selenium pytesseract Pillow webdriver-manager
+          pip install undetected-chromedriver pytesseract Pillow selenium
 
       - name: Run Script
         env:
