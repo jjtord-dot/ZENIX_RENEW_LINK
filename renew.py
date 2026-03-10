@@ -2,62 +2,64 @@ import os
 import time
 import pytesseract
 from PIL import Image
-from selenium import webdriver
+import undetected_照顾_chromedriver as uc # Special driver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 def solve_zenix():
-    print("Starting Ultimate Zenix Auto-Renew...")
-    options = Options()
-    options.add_argument('--headless=new') # Updated headless mode
+    print("🚀 Starting Ultimate No-Error Script...")
+    
+    options = uc.ChromeOptions()
+    options.add_argument('--headless') # Takbo sa background
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
-    options.add_argument('--window-size=1920,1080')
-    # Para hindi mahalata na bot
-    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+    
+    # Ginagaya ang totoong tao na browser
+    driver = uc.Chrome(options=options, version_main=122) 
 
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
     url = os.environ.get('ZENIX_RENEW_LINK')
 
     try:
         driver.get(url)
-        print("Page opened. Waiting for elements...")
+        print(f"✅ Page loaded: {url}")
         
-        wait = WebDriverWait(driver, 20)
+        # Mas mahabang wait para sa Cloudflare (25 seconds)
+        wait = WebDriverWait(driver, 25)
 
-        # 1. HANAPIN ANG CAPTCHA IMAGE (Mas matinding Filter)
-        # Hahanapin ang kahit anong image na hindi logo
-        captcha_img = wait.until(EC.visibility_of_element_located((By.XPATH, "//img[not(contains(@src, 'logo'))]")))
+        # 1. HANAPIN ANG CAPTCHA IMAGE
+        # Gagamit ng flexible XPath para kahit magbago ang design, mahanap pa rin
+        captcha_img = wait.until(EC.visibility_of_element_located((By.XPATH, "//img[contains(@src, 'captcha')] | //img[not(contains(@src, 'logo'))]")))
+        
+        # Siguraduhin na ang screenshot ay malinaw para sa OCR
         captcha_img.screenshot("captcha.png")
-        print("Captcha image saved.")
+        print("📸 Captcha captured!")
 
-        # 2. OCR READING
-        raw_text = pytesseract.image_to_string(Image.open("captcha.png"))
-        solved_code = "".join(raw_text.split()) 
-        print(f"OCR Result: {solved_code}")
+        # 2. OCR READING (PAGBASA NG CODE)
+        img = Image.open("captcha.png")
+        raw_text = pytesseract.image_to_string(img)
+        solved_code = "".join(raw_text.split()) # Alisin lahat ng spaces
+        print(f"🔍 OCR Result: {solved_code}")
 
-        # 3. TYPE AND SUBMIT
-        # Hahanapin ang text box at ang tanging button sa page
-        input_box = wait.until(EC.element_to_be_clickable((By.TAG_NAME, "input")))
+        if not solved_code:
+            raise Exception("Hindi nabasa ang CAPTCHA. Retrying may be needed.")
+
+        # 3. INPUT AT SUBMIT
+        input_box = wait.until(EC.presence_of_element_located((By.TAG_NAME, "input")))
         input_box.send_keys(solved_code)
         
-        submit_btn = driver.find_element(By.TAG_NAME, "button")
+        # Hanapin ang button na may text na 'Verify'
+        submit_btn = driver.find_element(By.XPATH, "//button[contains(., 'Verify')]")
         submit_btn.click()
         
-        print("Verify button clicked. Waiting for confirmation...")
-        time.sleep(10) # Mas matagal na hintay para sa server response
+        print("👆 Verify button clicked!")
+        time.sleep(8) # Hintayin ang "Renewal Successful" message
         
-        # Screenshot para sa proof ng success
-        driver.save_screenshot("result.png")
-        print("Check result.png in artifacts if enabled.")
+        print("🎉 Process Finished! Check your dashboard.")
 
     except Exception as e:
-        print(f"Bumagsak: {e}")
-        driver.save_screenshot("error_debug.png")
+        print(f"❌ Error: {e}")
+        driver.save_screenshot("error_debug.png") # Screenshot kung bakit nag-error
     finally:
         driver.quit()
 
