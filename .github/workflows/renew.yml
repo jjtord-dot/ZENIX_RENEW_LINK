@@ -30,3 +30,12 @@ jobs:
         env:
           ZENIX_RENEW_LINK: ${{ secrets.ZENIX_RENEW_LINK }}
         run: python renew.py
+
+      - name: Upload Screenshot on Failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: error-screenshots
+          path: |
+            captcha.png
+            error_page.png
